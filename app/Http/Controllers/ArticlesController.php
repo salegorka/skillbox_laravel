@@ -45,12 +45,14 @@ class ArticlesController extends Controller
         } else {
             $published = false;
         }
-       $article = Article::create(['slug' => $data['slug'],
+       $article = Article::create([
+           'slug' => $data['slug'],
             'name' => $data['name'],
             'short_description' => $data['short-description'],
             'description' => $data['description'],
-            'published' => $published]);
-        return redirect('/?created=' . $article->slug);
+            'published' => $published
+       ]);
+        return redirect()->route('main', ['created' => $article->slug]);
     }
 
     public function edit(Article $article)
@@ -73,13 +75,13 @@ class ArticlesController extends Controller
             'description' => $data['description'],
             'published' => $published
         ]);
-        return redirect('/?updated=' . $article->slug);
+        return redirect()->route('main', ['updated' => $article->slug]);
     }
 
     public function destroy(Article $article)
     {
         $name = $article->name;
         $article->delete();
-        return redirect('/?deleted=' . $name);
+        return redirect()->route('main', ['deleted' => $name]);
     }
 }

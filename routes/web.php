@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ArticlesController;
 use App\Http\Controllers\FeedbackController;
-Route::get('/', [ArticlesController::class, 'index']);
+Route::get('/', [ArticlesController::class, 'index'])->name('main');
 Route::get('/articles/create', [ArticlesController::class, 'create']);
 Route::get('/articles/{article}', [ArticlesController::class, 'show']);
 Route::get('/articles/{article}/edit', [ArticlesController::class, 'edit']);
