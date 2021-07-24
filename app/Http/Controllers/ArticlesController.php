@@ -11,16 +11,19 @@ class ArticlesController extends Controller
     public function index(Request $request)
     {
         $notification = "";
-        if ($request->has('updated')) {
-            $art = Article::where('slug', '=', $request->updated)->first();
+        if ($request->session()->has('updated')) {
+            $art = Article::where('slug', '=', $request->session()->get('updated'))
+                ->first();
             $notification = "Статья с названием " . $art->name . " обновлена.";
         }
-        if ($request->has('created')) {
-            $art = Article::where('slug', '=', $request->created)->first();
+        if ($request->session()->has('created')) {
+            $art = Article::where('slug', '=', $request->session()->get('created'))
+                ->first();
             $notification = "Статья с названием " . $art->name . " создана.";
         }
-        if ($request->has('deleted')) {
-            $notification = "Статья с названием " . $request->deleted . " удалена.";
+        if ($request->session()->has('deleted')) {
+            $notification = "Статья с названием " . $request->session()
+                    ->get('deleted') . " удалена.";
         }
         $articles = Article::where('published', 1)->latest()->get();
         return view('main', compact('articles', 'notification'));
@@ -52,7 +55,7 @@ class ArticlesController extends Controller
             'description' => $data['description'],
             'published' => $published
        ]);
-        return redirect()->route('main', ['created' => $article->slug]);
+        return redirect()->route('main')->with("created", $article->slug);
     }
 
     public function edit(Article $article)
@@ -75,13 +78,13 @@ class ArticlesController extends Controller
             'description' => $data['description'],
             'published' => $published
         ]);
-        return redirect()->route('main', ['updated' => $article->slug]);
+        return redirect()->route('main')->with("updated", $article->slug);
     }
 
     public function destroy(Article $article)
     {
         $name = $article->name;
         $article->delete();
-        return redirect()->route('main', ['deleted' => $name]);
+        return redirect()->route('main')->with("deleted", $name);
     }
 }
