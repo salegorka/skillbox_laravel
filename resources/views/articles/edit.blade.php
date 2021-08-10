@@ -1,6 +1,6 @@
 @extends('base')
 @section('title')
-    Блог Laravel - Создать статью
+    Блог Laravel - Редактировать статью
 @endsection
 @section('main')
     <main role="main" class="container">
@@ -15,10 +15,11 @@
                         </ul>
                     </div>
                 @endif
-                <form method="POST" action="/articles">
+                <form method="POST" action="/articles/{{$article->slug}}">
                     @csrf
-                    @include('forms.articles')
-                    <button type="submit" class="btn btn-primary">Создать статью</button>
+                    @method("PATCH")
+                    @include("forms.articles")
+                    <button type="submit" class="btn btn-primary">Обновить статью</button>
                 </form>
             </div>
 

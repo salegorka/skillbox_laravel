@@ -2,15 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreArticleRequest;
+use App\Http\Requests\UpdateArticleRequest;
 use Illuminate\Http\Request;
 use App\Models\Article;
 class ArticlesController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
+        $notification = "";
+        if ($request->session()->has('updated')) {
+            $art = Article::where('slug', '=', $request->session()->get('updated'))
+                ->first();
+            $notification = "Статья с названием " . $art->name . " обновлена.";
+        }
+        if ($request->session()->has('created')) {
+            $art = Article::where('slug', '=', $request->session()->get('created'))
+                ->first();
+            $notification = "Статья с названием " . $art->name . " создана.";
+        }
+        if ($request->session()->has('deleted')) {
+            $notification = "Статья с названием " . $request->session()
+                    ->get('deleted') . " удалена.";
+        }
         $articles = Article::where('published', 1)->latest()->get();
-        return view('main', compact('articles'));
+        return view('main', compact('articles', 'notification'));
     }
 
     public function show(Article $article)
@@ -23,26 +40,52 @@ class ArticlesController extends Controller
         return view('articles.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreArticleRequest $request)
     {
-        $request->validate([
-            'slug' => ['required','unique:articles', 'regex:/^[a-zA-Z0-9_-]+$/i'],
-            'name' => 'required|min:5|max:255',
-            'short-description' => 'required|max:255',
-            'description' => 'required'
-        ]);
-        $data = $request->all();
-        $article = new Article();
-        $article->slug = $data['slug'];
-        $article->name = $data['name'];
-        $article->short_description = $data['short-description'];
-        $article->description = $data['description'];
+        $data = $request->validated();
+
         if (isset($data['published']) && $data['published'] == 'on') {
-            $article->published = true;
+            $published = true;
         } else {
-            $article->published = false;
+            $published = false;
         }
-        $article->save();
-        return redirect('/');
+       $article = Article::create([
+           'slug' => $data['slug'],
+            'name' => $data['name'],
+            'short_description' => $data['short-description'],
+            'description' => $data['description'],
+            'published' => $published
+       ]);
+        return redirect()->route('main')->with("created", $article->slug);
+    }
+
+    public function edit(Article $article)
+    {
+        return view('articles.edit', compact('article'));
+    }
+
+    public function update(UpdateArticleRequest $request, Article $article)
+    {
+        $data = $request->validated();
+        if (isset($data['published']) && $data['published'] == 'on') {
+            $published = true;
+        } else {
+            $published = false;
+        }
+        $article->update([
+            'slug' => $data['slug'],
+            'name' => $data['name'],
+            'short_description' => $data['short-description'],
+            'description' => $data['description'],
+            'published' => $published
+        ]);
+        return redirect()->route('main')->with("updated", $article->slug);
+    }
+
+    public function destroy(Article $article)
+    {
+        $name = $article->name;
+        $article->delete();
+        return redirect()->route('main')->with("deleted", $name);
     }
 }
