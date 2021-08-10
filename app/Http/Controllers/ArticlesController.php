@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ArticleRequest;
+use App\Http\Requests\StoreArticleRequest;
+use App\Http\Requests\UpdateArticleRequest;
 use Illuminate\Http\Request;
 use App\Models\Article;
 class ArticlesController extends Controller
@@ -39,7 +40,7 @@ class ArticlesController extends Controller
         return view('articles.create');
     }
 
-    public function store(ArticleRequest $request)
+    public function store(StoreArticleRequest $request)
     {
         $data = $request->validated();
 
@@ -63,7 +64,7 @@ class ArticlesController extends Controller
         return view('articles.edit', compact('article'));
     }
 
-    public function update(ArticleRequest $request, Article $article)
+    public function update(UpdateArticleRequest $request, Article $article)
     {
         $data = $request->validated();
         if (isset($data['published']) && $data['published'] == 'on') {
